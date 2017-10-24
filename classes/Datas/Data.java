@@ -6,6 +6,8 @@ public interface Data {
 	
 	public void setUpdated(boolean bol);
 	
+	public void check();
+	
 	public String[] load();
 
 }
