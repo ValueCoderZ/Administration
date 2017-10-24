@@ -1,6 +1,6 @@
 package Modules;
 
-import com.mysql.fabric.xmlrpc.base.Data;
+import Datas.Data;
 
 public interface Module {
 	
