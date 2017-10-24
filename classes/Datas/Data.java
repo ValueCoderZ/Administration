@@ -6,8 +6,8 @@ public interface Data {
 	
 	public void setUpdated(boolean bol);
 	
-	public void check();
+	public void check(MySQL mysql);
 	
-	public String[] load();
+	public String[] load(MySQL mysql);
 
 }
