@@ -9,5 +9,7 @@ public interface Module {
 	public String build(Data data);
 	
 	public boolean jqueryupdate();
+	
+	public boolean pushnotification();
 
 }
