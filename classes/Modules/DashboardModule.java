@@ -22,7 +22,10 @@ public class DashboardModule implements Module {
 		int tickets = Integer.valueOf(ldata[2]);
 		int forum = Integer.valueOf(ldata[3]);
 		
-		String htmlstatus = "section";
+		String htmlstatus = "<h5 class='center red-text'>Offline</h5>";
+		if(status.equalsIgnoreCase("Online")){
+			htmlstatus = "<h5 class='center green-text'>Online</h5>";
+		}
 		String htmlregistered = "scrollspy";
 		String htmltickets = "container";
 		String htmlforum = "row";
