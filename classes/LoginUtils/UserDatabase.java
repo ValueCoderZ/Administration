@@ -14,9 +14,9 @@ public class UserDatabase {
 	private static String DATABASE = "database";
 	private static String USER = "root";
 	private static String PASSWORD = "password";
-	
+
 	private static Connection con;
-	
+
 	public static void connect() {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
@@ -28,10 +28,10 @@ public class UserDatabase {
 			System.out.println("[MySQL] Die Verbindung zur MySQL ist fehlgeschlagen! Fehler: " + e.getMessage());
 		} catch (ClassNotFoundException e) {
 			System.out.println("Treiber nicht geladen: " + e.getMessage());
-		} 
+		}
 		createTables();
 	}
-	
+
 	public static void close() {
 		try {
 			if(con != null) {
@@ -42,13 +42,13 @@ public class UserDatabase {
 			System.out.println("[MySQL] Fehler beim beenden der Verbindung zur MySQL! Fehler: " + e.getMessage());
 		}
 	}
-	
+
 	public static void update(String qry) {
-		
+
 		if(con == null){
 			connect();
 		}
-		
+
 		try {
 			Statement st = con.createStatement();
 			st.executeUpdate(qry);
@@ -57,15 +57,15 @@ public class UserDatabase {
 			System.err.println(e);
 		}
 	}
-	
+
 	public static ResultSet query(String qry) {
-		
+
 		if(con == null){
 			connect();
 		}
-		
+
 		ResultSet rs = null;
-		
+
 		try {
 			Statement st = con.createStatement();
 			rs = st.executeQuery(qry);
@@ -74,7 +74,7 @@ public class UserDatabase {
 		}
 		return rs;
 	}
-	
+
 	public static void createTables(){
 		update("CREATE TABLE IF NOT EXISTS users (id INTEGER AUTO_INCREMENT PRIMARY KEY, name TEXT, passwort TEXT, role TEXT, isalternate TEXT)");
 		update("CREATE TABLE IF NOT EXISTS usersalts (id INTEGER PRIMARY KEY, secret TEXT, FOREIGN KEY(id) REFERENCES users(id))");
@@ -82,21 +82,22 @@ public class UserDatabase {
 //		update("CREATE TABLE IF NOT EXISTS usersalts (id INTEGER PRIMARY KEY, salt VARBINARY)");
 		// FOREIGN KEY(id) REFERENCES users(id)
 	}
-	
+
 	public static void registerUser(String name, String password, String alternate, String group){
 		if(con == null){
 			connect();
 		}
 		byte[] salt = MD5Hash.getNewSalt();
 		password = MD5Hash.hashPassword(password, salt);
-		
+
 		try {
-			PreparedStatement ps = con.prepareStatement("INSERT INTO users (name, passwort, role, isalternate) VALUES (?, ?, ?, '"+alternate+"')");
-			
+			PreparedStatement ps = con.prepareStatement("INSERT INTO users (name, passwort, role, isalternate) VALUES (?, ?, ?, ?)");
+
 			ps.setString(1, name);
 			ps.setString(2, password);
 			ps.setString(3, Groups.getRankByName(group).toString());
-			
+			ps.setString(4, alternate)
+
 			ps.executeUpdate();
 			int userid = UserDatabase.getUserID(name);
 			update("INSERT INTO usersalts (id, secret) VALUES ('"+userid+"', '"+Arrays.toString(salt)+"')");
@@ -104,15 +105,15 @@ public class UserDatabase {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
+
 	}
-	
+
 	public static boolean userRegistered(String name){
-		
+
 		if(con == null){
 			connect();
 		}
-		
+
 		ResultSet rs;
 		PreparedStatement ps;
 		try {
@@ -126,13 +127,13 @@ public class UserDatabase {
 			e.printStackTrace();
 		}
 		return false;
-	}	
-	
+	}
+
 	public static int getUserID(String name){
 		if(con == null){
 			connect();
 		}
-		
+
 		ResultSet rs;
 		PreparedStatement ps;
 		try {
@@ -147,12 +148,12 @@ public class UserDatabase {
 		}
 		return 0;
 	}
-	
+
 	public static String getSalt(int id){
 		if(con == null){
 			connect();
 		}
- 		
+
 		ResultSet rs = query("SELECT * FROM usersalts WHERE id= '" + id + "'");
 		try{
 			while(rs.next()){
@@ -163,14 +164,14 @@ public class UserDatabase {
 		}
 		return null;
 	}
-	
+
 	public static String getPassword(String name){
 		if(con == null){
 			connect();
 		}
-		
+
 		if(userRegistered(name)){
-			
+
 			ResultSet rs = query("SELECT * FROM users WHERE name= '" + name + "'");
 			try{
 				while(rs.next()){
@@ -182,14 +183,14 @@ public class UserDatabase {
 		}
 		return null;
 	}
-	
+
 	public static String getGroup(String name){
 		if(con == null){
 			connect();
 		}
-		
+
 		if(userRegistered(name)){
-			
+
 			ResultSet rs = query("SELECT * FROM users WHERE name= '" + name + "'");
 			try{
 				while(rs.next()){
@@ -202,14 +203,14 @@ public class UserDatabase {
 		}
 		return null;
 	}
-	
+
 	public static boolean isAlternate(String name){
 		if(con == null){
 			connect();
 		}
-		
+
 		if(userRegistered(name)){
-			
+
 			ResultSet rs = query("SELECT * FROM users WHERE name= '" + name + "'");
 			try{
 				while(rs.next()){
@@ -223,7 +224,7 @@ public class UserDatabase {
 		}
 		return false;
 	}
-	
+
 	public static String getSettings(String name){
 		String settings = "an,an,an,an,an,an,an,an,default";
 		if(con == null){
@@ -243,7 +244,7 @@ public class UserDatabase {
 		}
 		return settings;
 	}
-	
+
 	public static void setSettings(int userid, String settings){
 		if(con == null){
 			connect();
